@@ -54,8 +54,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
 
     let code = quote::quote! {
 
-        use crate::utils::conv_data::*;
-        use crate::api::*;
+        use orm_uu::conv_data::*;
 
         impl #ident{
 
@@ -65,7 +64,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             // }
 
             /// 数据库查询方法
-            pub async fn db_query<T: ToString>(session: &std::sync::Arc<scylla::Session>, where_sql: String, where_in_vars: impl Into<VecInto<T>>, limit_v: Option<isize>) -> R<Vec<Self>> {
+            pub async fn db_query<T: ToString>(session: &std::sync::Arc<scylla::Session>, where_sql: String, where_in_vars: impl Into<VecInto<T>>, limit_v: Option<isize>) -> common_uu::IResult<Vec<Self>> {
 
                 let ref where_in_vars = where_in_vars.into().0;
 
@@ -94,7 +93,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
                         debug!("db_query in var ele.len: {}", where_sql.len());
 
                         // 带wherein条件的情况
-                        use crate::scylladb::ScyllaQuery;
+                        use orm_uu::scylladb::ScyllaQuery;
                         let query = ScyllaQuery::from(cql.clone()).wherein2(where_sql);
 
                         debug!("cql: {:?}", query.contents);
@@ -102,7 +101,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
                         r_rows.append(&mut rows);
                     }
                 }else{
-                    use crate::scylladb::ScyllaQuery;
+                    use orm_uu::scylladb::ScyllaQuery;
                     let query = ScyllaQuery::from(cql.clone()).query;
                     debug!("cql: {:?}", query.contents);
                     let mut rows = session.query(query, &[]).await?.rows()?;
@@ -272,7 +271,7 @@ pub fn cache_query_zrange_macro(input: TokenStream) -> TokenStream {
             pub async fn cache_zrange<T: redis_cluster_async::redis::FromRedisValue>(
                 pool: &RedisPool,
                 k: impl redis_cluster_async::redis::ToRedisArgs + Send + Sync,
-                offset: isize, limit: isize) -> R<T> {
+                offset: isize, limit: isize) -> common_uu::IResult<T> {
 
                 let r = pool
                     .get()
