@@ -5,7 +5,7 @@ use syn::{Data, Fields};
 
 /// 生成方法
 /// db_query<T: ToString>(session: &Arc<scylla::Session>, where_sql: String, where_in_vars: &Vec<T>) -> R<Vec<Self>>
-#[proc_macro_derive(DbQuery)]
+#[proc_macro_derive(ScyllaDBQuery)]
 pub fn db_query(input: TokenStream) -> TokenStream {
     let empty = quote::quote! {};
     let input = syn::parse_macro_input!(input as syn::DeriveInput);
@@ -134,7 +134,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
     code.into()
 }
 
-#[proc_macro_derive(CacheQueryHget)]
+#[proc_macro_derive(RedisHget)]
 pub fn cache_query_macro(input: TokenStream) -> TokenStream {
     let empty = quote::quote! {};
     let input = syn::parse_macro_input!(input as syn::DeriveInput);
@@ -252,7 +252,7 @@ pub fn cache_query_macro(input: TokenStream) -> TokenStream {
     code.into()
 }
 
-#[proc_macro_derive(CacheQueryZrange)]
+#[proc_macro_derive(RedisZrange)]
 pub fn cache_query_zrange_macro(input: TokenStream) -> TokenStream {
     let _empty = quote::quote! {};
     let input = syn::parse_macro_input!(input as syn::DeriveInput);
