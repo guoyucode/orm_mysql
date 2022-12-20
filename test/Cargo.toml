@@ -10,3 +10,5 @@ serde_json = { version = "1.0", features = ["preserve_order"] }
 common_uu = {git = "https://gitee.com/guoyucode/common_uu.git", default-features = false}
 serde = { version = "1.0.106", features = ["derive"] }
 scylla = "*"
+redis_cluster_async = {  git = "https://github.com/zhiyong0804/redis-cluster-async.git" }
+redis-async-pool = { git = "https://github.com/zhiyong0804/redis-async-pool" }
