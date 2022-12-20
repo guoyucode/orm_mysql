@@ -12,7 +12,9 @@ log = "*"
 serde_json = { version = "1.0", features = ["preserve_order"] }
 common_uu = {git = "https://gitee.com/guoyucode/common_uu.git", default-features = false}
 serde = { version = "1.0", features = ["derive"] }
-scylla = "*"
+scylla = "0.7"
+mysql_async = "0.31"
+async-trait = "0.1.60"
 
 [dev-dependencies]
 log = "*"
@@ -20,6 +22,7 @@ serde_json = { version = "1.0", features = ["preserve_order"] }
 common_uu = {git = "https://gitee.com/guoyucode/common_uu.git", default-features = false}
 serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.13", features = ["rt", "rt-multi-thread", "macros", ] }
+
 
 # scylladb
 scylla = "*"
@@ -29,4 +32,3 @@ redis_cluster_async = {  git = "https://github.com/zhiyong0804/redis-cluster-asy
 redis-async-pool = { git = "https://github.com/zhiyong0804/redis-async-pool" }
 
 # mysql
-mysql_async = "*"
