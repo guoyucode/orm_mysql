@@ -1,5 +1,5 @@
 use mysql_async::prelude::{Query, ToConnection, WithParams};
-use orm_uu::MySqlQuery;
+use orm_uu::{OrmMySql};
 use orm_uu::mysql::ORMr;
 
 #[tokio::main]
@@ -12,7 +12,7 @@ async fn main() -> common_uu::IResult {
     Ok(())
 }
 
-#[derive(MySqlQuery)]
+#[derive(OrmMySql)]
 struct User {
     id: i64,
     name: String,

@@ -9,7 +9,7 @@ async fn query( comm: C, where_sql: &str, limit: Option<usize>) -> common_uu::IR
 async fn query_one( comm: C, where_sql: &str) -> common_uu::IResult<Option<Self>>
 */
 /// 
-#[proc_macro_derive(MySqlQuery)]
+#[proc_macro_derive(OrmMySql, attributes(orm_mysql))]
 pub fn mysql_query(input: TokenStream) -> TokenStream{
     mysql::db_query(input)
 }
