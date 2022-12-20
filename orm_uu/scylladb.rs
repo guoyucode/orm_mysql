@@ -1,8 +1,6 @@
 use scylla::query::Query;
 
 
-
-
 pub struct ScyllaQuery {
     pub query: Query,
 }
