@@ -94,14 +94,14 @@ pub fn db_query(input: TokenStream) -> TokenStream {
                         use orm_uu::scylladb::ScyllaQuery;
                         let query = ScyllaQuery::from(cql.clone()).wherein2(where_sql);
 
-                        debug!("cql: {:?}", query.contents);
+                        debug!("cql: {}", query.contents);
                         let mut rows = session.query(query, &[]).await?.rows()?;
                         r_rows.append(&mut rows);
                     }
                 }else{
                     use orm_uu::scylladb::ScyllaQuery;
                     let query = ScyllaQuery::from(cql.clone()).query;
-                    debug!("cql: {:?}", query.contents);
+                    debug!("cql: {}", query.contents);
                     let mut rows = session.query(query, &[]).await?.rows()?;
                     r_rows.append(&mut rows);
                 }

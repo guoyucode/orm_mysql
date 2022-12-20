@@ -2,6 +2,7 @@ use proc_macro::TokenStream;
 
 mod redis;
 mod scylla;
+mod mysql;
 
 /// 生成方法
 /// db_query<T: ToString>(session: &Arc<scylla::Session>, where_sql: String, where_in_vars: &Vec<T>, limit_v: Option<isize>) -> R<Vec<Self>>
