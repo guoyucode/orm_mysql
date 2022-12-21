@@ -27,6 +27,11 @@ examples:
         // sql: select user_id,username from users where 1=1 limit 1000
         println!("find count: {}", list.len());
 
+        // query_one
+        let one = UserData::query_one(&mut tx, "where 1=1").await?;
+        // sql: select user_id,username from users where 1=1 limit 1
+        println!("find count: {:?}", one.is_some());
+
         Ok(())
     }
 
