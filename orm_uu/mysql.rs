@@ -1,5 +1,3 @@
-use mysql_async::prelude::ToConnection;
-
 #[async_trait::async_trait]
 pub trait OrmMySqlTrait {
     async fn query_list<C>(

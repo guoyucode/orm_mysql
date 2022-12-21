@@ -98,9 +98,9 @@ pub fn db_query(input: TokenStream) -> TokenStream {
     let table_fields_str = table_fields_ident.join(",");
 
     let code = quote::quote! {
-    use mysql_async::prelude::*;
+    use orm_uu::mysql_async::prelude::*;
 
-    #[async_trait::async_trait]
+    #[orm_uu::async_trait::async_trait]
     impl orm_uu::mysql::OrmMySqlTrait for #struct_name {
 
         async fn query_list<C>(

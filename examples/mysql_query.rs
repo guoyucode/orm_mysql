@@ -1,7 +1,5 @@
-use mysql_async::prelude::{Query, ToConnection, WithParams};
 use orm_uu::{OrmMySql};
 use orm_uu::mysql::OrmMySqlTrait;
-// use mysql_async::prelude::Queryable;
 
 #[tokio::main]
 async fn main() -> common_uu::IResult {

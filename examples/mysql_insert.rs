@@ -1,5 +1,3 @@
-use mysql_async::params;
-use mysql_async::prelude::*;
 use orm_uu::mysql::OrmMySqlTrait;
 use orm_uu::OrmMySql;
 
