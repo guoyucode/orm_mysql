@@ -1,6 +1,7 @@
 use mysql_async::prelude::{Query, ToConnection, WithParams};
 use orm_uu::{OrmMySql};
 use orm_uu::mysql::ORMr;
+// use mysql_async::prelude::Queryable;
 
 #[tokio::main]
 async fn main() -> common_uu::IResult {
@@ -9,17 +10,22 @@ async fn main() -> common_uu::IResult {
     let mut tx = pool.start_transaction(mysql_async::TxOpts::new()).await?;
     
     // use connection
-    let list = User::query(conn, "", None).await?;
+    let list = UserData::query(&mut conn, "where 1 != 1", None).await?;
+    // sql: select user_id,username from users where 1 != 1
+    println!("find count: {}", list.len());
 
     // use transaction
-    let list = User::query(&mut tx, "", None).await?;
+    let list = UserData::query(&mut tx, "where 1=1", Some(1000)).await?;
+    // sql: select user_id,username from users where 1=1 limit 1000
+    println!("find count: {}", list.len());
     Ok(())
 }
 
 #[derive(OrmMySql)]
-struct User {
-    id: i64,
-    name: String,
+#[orm_mysql(table_name=users)] // is not config: table_name => user_data
+struct UserData {
+    user_id: i64,
+    username: String,
 }
 
 

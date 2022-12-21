@@ -3,11 +3,53 @@ use proc_macro::TokenStream;
 use quote::ToTokens;
 use syn::{Data, Fields};
 
+use crate::utils;
+
 pub fn db_query(input: TokenStream) -> TokenStream {
     let empty = quote::quote! {};
     let input = syn::parse_macro_input!(input as syn::DeriveInput);
-    let syn::DeriveInput { ident: table_name, data, .. } = input;
+    let syn::DeriveInput {
+        attrs,
+        ident: struct_name,
+        data,
+        ..
+    } = input;
     // attrs
+
+    let attrs = attrs
+        .iter()
+        .filter(|v| {
+            v.path
+                .segments
+                .iter()
+                .find(|v| v.ident.to_string() == "orm_mysql")
+                .is_some()
+        })
+        .collect::<Vec<_>>();
+
+    let mut table_name = String::new();
+    if let Some(attr) = attrs.get(0) {
+        let attr = attr.tokens.to_string();
+        let attr = attr.trim().trim_start_matches('(').trim_end_matches(')');
+        let attrs = attr.split_arr(",");
+        for ele in attrs {
+            let (k, v) = ele.split_two("=");
+            let k = k.trim().trim_end_matches("\"").trim_end_matches("\"");
+            let v = v.trim().trim_end_matches("\"").trim_end_matches("\"");
+            if k == "table_name" {
+                table_name = v.to_string();
+            } else {
+                panic!("supper attr: {}", v);
+            }
+        }
+    }
+
+    if table_name.is_empty() {
+        let name = struct_name.to_string();
+        table_name = utils::to_snake_name(&name);
+    }
+
+    // println!("table_name: {table_name}");
 
     let fields = match data {
         Data::Struct(d) => d.fields,
@@ -50,44 +92,59 @@ pub fn db_query(input: TokenStream) -> TokenStream {
     let table_fields_str = table_fields_ident.join(",");
 
     let code = quote::quote! {
-        use mysql_async::prelude::*;
+    use mysql_async::prelude::*;
 
-        #[async_trait::async_trait]
-        impl orm_uu::mysql::ORMr for #table_name {
+    #[async_trait::async_trait]
+    impl orm_uu::mysql::ORMr for #struct_name {
 
-            async fn query<'a, 't: 'a, C>(
-                comm: C,
-                where_sql: &'a str,
-                limit: Option<usize>,
-            ) -> common_uu::IResult<Vec<Self>>
-            where
-                Self: Sized,
-                C: ToConnection<'a, 't> + 'a,
-            {
-                let r = where_sql
-                    .with(())
-                    .map(comm, |(#(#fields_ident_init),*)| Self { #(#fields_ident_init),* })
-                    .await?;
-                Ok(r)
+        async fn query<C>(
+            comm: &mut C,
+            where_sql: &str,
+            limit: Option<usize>,
+        ) -> common_uu::IResult<Vec<Self>>
+        where
+            Self: Sized,
+            C: mysql_async::prelude::Queryable + Send + Sync,
+        {
+
+            let table_name_var = #table_name;
+            let mut sql = format!("select {select_sql} from {table_name_var} {where_sql}",
+                select_sql = #table_fields_str,
+                table_name_var = table_name_var,
+                where_sql = where_sql,
+            );
+
+            if let Some(v) = limit{
+                sql.push_str(&format!(" limit {}", v));
             }
 
-            async fn query_one<'a, 't: 'a, C>(
-                comm: C,
-                where_sql: &'a str,
-            ) -> common_uu::IResult<Option<Self>>
-            where
-                Self: Sized,
-                C: ToConnection<'a, 't> + 'a,
-            {
-                let mut r = Self::query(comm, where_sql, Some(1)).await?;
-                match r.len(){
-                    0 => return Ok(None),
-                    1 => return Ok(Some(r.remove(0))),
-                    _ => return Err(format!("'{where_sql}' find more row data!", where_sql = where_sql))?,
-                }
-            }
+            let sql = sql.as_str();
+
+            // println!("sql: {}", sql);
+
+            let r = comm
+                .query_map(sql, |(#(#fields_ident_init),*)| Self { #(#fields_ident_init),* })
+                .await?;
+            Ok(r)
         }
 
-        };
+        async fn query_one<C>(
+            comm: &mut C,
+            where_sql: &str,
+        ) -> common_uu::IResult<Option<Self>>
+        where
+            Self: Sized,
+            C: mysql_async::prelude::Queryable + Send + Sync,
+        {
+            let mut r = Self::query(comm, where_sql, Some(1)).await?;
+            match r.len(){
+                0 => return Ok(None),
+                1 => return Ok(Some(r.remove(0))),
+                _ => return Err(format!("'{where_sql}' find more row data!", where_sql = where_sql))?,
+            }
+        }
+    }
+
+    };
     code.into()
 }

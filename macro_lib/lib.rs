@@ -3,6 +3,7 @@ use proc_macro::TokenStream;
 mod redis;
 mod scylla;
 mod mysql;
+mod utils;
 
 /* 
 async fn query( comm: C, where_sql: &str, limit: Option<usize>) -> common_uu::IResult<Vec<Self>>
