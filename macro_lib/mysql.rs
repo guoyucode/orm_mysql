@@ -97,7 +97,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
     #[async_trait::async_trait]
     impl orm_uu::mysql::ORMr for #struct_name {
 
-        async fn query<C>(
+        async fn query_list<C>(
             comm: &mut C,
             where_sql: &str,
             limit: Option<usize>,
@@ -136,7 +136,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             Self: Sized,
             C: mysql_async::prelude::Queryable + Send + Sync,
         {
-            let mut r = Self::query(comm, where_sql, Some(1)).await?;
+            let mut r = Self::query_list(comm, where_sql, Some(1)).await?;
             match r.len(){
                 0 => return Ok(None),
                 1 => return Ok(Some(r.remove(0))),

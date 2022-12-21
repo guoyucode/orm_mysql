@@ -10,12 +10,12 @@ async fn main() -> common_uu::IResult {
     let mut tx = pool.start_transaction(mysql_async::TxOpts::new()).await?;
     
     // use connection
-    let list = UserData::query(&mut conn, "where 1 != 1", None).await?;
+    let list = UserData::query_list(&mut conn, "where 1 != 1", None).await?;
     // sql: select user_id,username from users where 1 != 1
     println!("find count: {}", list.len());
 
     // use transaction
-    let list = UserData::query(&mut tx, "where 1=1", Some(1000)).await?;
+    let list = UserData::query_list(&mut tx, "where 1=1", Some(1000)).await?;
     // sql: select user_id,username from users where 1=1 limit 1000
     println!("find count: {}", list.len());
 

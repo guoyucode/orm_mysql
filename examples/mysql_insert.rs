@@ -12,20 +12,9 @@ async fn main() -> common_uu::IResult {
     // use connection
     let sql = "insert into users (user_id, username)values(:user_id, :username)";
     sql.with(vec![].iter().map(|UserData{ user_id, username }| params! {
-
+        "user_id" => user_id,
+        "username" => username,
     })).batch(&mut conn);
-    // sql: select user_id,username from users where 1 != 1
-    println!("find count: {}", list.len());
-
-    // use transaction
-    let list = UserData::query(&mut tx, "where 1=1", Some(1000)).await?;
-    // sql: select user_id,username from users where 1=1 limit 1000
-    println!("find count: {}", list.len());
-
-    // query_one
-    let one = UserData::query_one(&mut tx, "where 1=1").await?;
-    // sql: select user_id,username from users where 1=1 limit 1
-    println!("find count: {:?}", one.is_some());
 
     Ok(())
 }

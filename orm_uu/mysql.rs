@@ -2,7 +2,7 @@ use mysql_async::prelude::ToConnection;
 
 #[async_trait::async_trait]
 pub trait ORMr {
-    async fn query<C>(
+    async fn query_list<C>(
         comm: &mut C,
         where_sql: &str,
         limit: Option<usize>,
@@ -18,4 +18,12 @@ pub trait ORMr {
     where
         Self: Sized,
         C: mysql_async::prelude::Queryable + Send + Sync;
+
+    // async fn insert_list<C>(
+    //     comm: &mut C,
+    //     where_sql: &str,
+    // ) -> common_uu::IResult<Option<Self>>
+    // where
+    //     Self: Sized,
+    //     C: mysql_async::prelude::Queryable + Send + Sync;
 }
