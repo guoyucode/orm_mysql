@@ -89,13 +89,19 @@ pub fn db_query(input: TokenStream) -> TokenStream {
         tys.push(ty);
     }
 
+    let mut query_quest = vec![];
+    for _ in &table_fields_ident {
+        query_quest.push("?");
+    }
+
+    let query_quest = query_quest.join(",");
     let table_fields_str = table_fields_ident.join(",");
 
     let code = quote::quote! {
     use mysql_async::prelude::*;
 
     #[async_trait::async_trait]
-    impl orm_uu::mysql::ORMr for #struct_name {
+    impl orm_uu::mysql::OrmMySqlTrait for #struct_name {
 
         async fn query_list<C>(
             comm: &mut C,
@@ -128,7 +134,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             Ok(r)
         }
 
-        async fn query_one<C>(
+        async fn query<C>(
             comm: &mut C,
             where_sql: &str,
         ) -> common_uu::IResult<Option<Self>>
@@ -142,6 +148,23 @@ pub fn db_query(input: TokenStream) -> TokenStream {
                 1 => return Ok(Some(r.remove(0))),
                 _ => return Err(format!("'{where_sql}' find more row data!", where_sql = where_sql))?,
             }
+        }
+
+        async fn insert<C>(self, conn: &mut C) -> common_uu::IResult<Option<i64>>
+        where
+            Self: Sized,
+            C: mysql_async::prelude::Queryable + Send + Sync
+        {
+
+            let mut params = vec![self].into_iter().map(|Self{#(#fields_ident_init),*}| (#(#fields_ident_init),*)).collect::<Vec<_>>();
+            let sql = format!("insert into {table_name_var} ({table_fields})values({query_quest})",
+                table_name_var = #table_name,
+                table_fields = #table_fields_str, 
+                query_quest = #query_quest,
+            );
+            let r: Option<(i64, )> = conn.exec_first(sql, params.remove(0)).await?;
+            let r = r.map(|v|v.0);
+            Ok(r)
         }
     }
 
