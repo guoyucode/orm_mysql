@@ -1,5 +1,5 @@
 #[macro_use]
-extern crate orm_uu;
+extern crate orm_mysql;
 #[macro_use]
 extern crate log;
 

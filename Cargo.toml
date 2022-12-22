@@ -1,10 +1,11 @@
 [package]
-name = "orm_uu"
+name = "orm_mysql"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-path = "orm_uu/lib.rs"
+path = "src/lib.rs"
+
 
 [dependencies]
 macro_lib = {path = "./macro_lib"}
@@ -12,9 +13,10 @@ log = "*"
 serde_json = { version = "1.0", features = ["preserve_order"] }
 common_uu = {git = "https://gitee.com/guoyucode/common_uu.git", default-features = false}
 serde = { version = "1.0", features = ["derive"] }
-scylla = "0.7"
 mysql_async = "0.31"
 async-trait = "0.1.60"
+scylla = { version = "0.7", optional = true}
+
 
 [dev-dependencies]
 log = "*"
@@ -22,13 +24,10 @@ serde_json = { version = "1.0", features = ["preserve_order"] }
 common_uu = {git = "https://gitee.com/guoyucode/common_uu.git", default-features = false}
 serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.13", features = ["rt", "rt-multi-thread", "macros", ] }
-
-
-# scylladb
-scylla = "*"
-
-# redis
 redis_cluster_async = {  git = "https://github.com/zhiyong0804/redis-cluster-async.git" }
 redis-async-pool = { git = "https://github.com/zhiyong0804/redis-async-pool" }
 
-# mysql
+
+[features]
+default = []
+use_scylladb = ["scylla"]

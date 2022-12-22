@@ -1,6 +1,6 @@
 use mysql_async::prelude::*;
-use orm_uu::mysql::OrmMySqlTrait;
-use orm_uu::OrmMySql;
+use orm_mysql::mysql::OrmMySqlTrait;
+use orm_mysql::OrmMySql;
 
 #[tokio::main]
 async fn main() -> common_uu::IResult {

@@ -99,7 +99,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
 
     let code = quote::quote! {
     use mysql_async::prelude::*;
-    use orm_uu::mysql::con_value::*;
+    use orm_mysql::mysql::con_value::*;
 
     impl From<#struct_name> for mysql_async::Params{
         fn from(#struct_name{ #(#fields_ident_init),* }: #struct_name) -> Self{
@@ -118,8 +118,8 @@ pub fn db_query(input: TokenStream) -> TokenStream {
         }
     }
 
-    #[orm_uu::async_trait::async_trait]
-    impl orm_uu::mysql::OrmMySqlTrait for #struct_name {
+    #[orm_mysql::async_trait::async_trait]
+    impl orm_mysql::mysql::OrmMySqlTrait for #struct_name {
 
         async fn query<C>(
             comm: &mut C,

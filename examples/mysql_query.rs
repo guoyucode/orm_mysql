@@ -1,5 +1,5 @@
-use orm_uu::{OrmMySql};
-use orm_uu::mysql::OrmMySqlTrait;
+use orm_mysql::{OrmMySql};
+use orm_mysql::mysql::OrmMySqlTrait;
 
 #[tokio::main]
 async fn main() -> common_uu::IResult {
@@ -8,17 +8,17 @@ async fn main() -> common_uu::IResult {
     let mut tx = pool.start_transaction(mysql_async::TxOpts::new()).await?;
     
     // use connection
-    let list = UserData::query_list(&mut conn, "where 1 != 1", None).await?;
+    let list = UserData::query(&mut conn, "where 1 != 1", None).await?;
     // sql: select user_id,username from users where 1 != 1
     println!("find count: {}", list.len());
 
     // use transaction
-    let list = UserData::query_list(&mut tx, "where 1=1", Some(1000)).await?;
+    let list = UserData::query(&mut tx, "where 1=1", Some(1000)).await?;
     // sql: select user_id,username from users where 1=1 limit 1000
     println!("find count: {}", list.len());
 
     // query_one
-    let one = UserData::query(&mut tx, "where 1=1").await?;
+    let one = UserData::query_first(&mut tx, "where 1=1").await?;
     // sql: select user_id,username from users where 1=1 limit 1
     println!("find count: {:?}", one.is_some());
 

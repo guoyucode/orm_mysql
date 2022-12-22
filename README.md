@@ -15,6 +15,10 @@ Join us: WeChat: wx_essence, Telegram: tg_essence;
 
 examples:
 
+    add Cargo.toml dependencies
+    mysql_async = "0.31"
+    orm_mysql = "*"
+
     fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
         let ref pool: mysql_async::Pool = mysql_async::Pool::new("mysql://username:pwd@ip:port/db_name");
         let mut conn: mysql_async::Conn = pool.get_conn().await?;

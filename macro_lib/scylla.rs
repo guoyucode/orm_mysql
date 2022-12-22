@@ -3,7 +3,6 @@ use proc_macro::TokenStream;
 use quote::ToTokens;
 use syn::{Data, Fields};
 
-
 pub fn db_query(input: TokenStream) -> TokenStream {
     let empty = quote::quote! {};
     let input = syn::parse_macro_input!(input as syn::DeriveInput);
@@ -52,7 +51,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
 
     let code = quote::quote! {
 
-        use orm_uu::conv_data::*;
+        use orm_mysql::conv_data::*;
 
         impl #ident{
 
@@ -62,7 +61,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             // }
 
             /// 数据库查询方法
-            pub async fn db_query<T: ToString>(session: &std::sync::Arc<scylla::Session>, where_sql: String, where_in_vars: impl Into<VecInto<T>>, limit_v: Option<isize>) -> common_uu::IResult<Vec<Self>> {
+            pub async fn db_query<T: ToString>(session: &std::sync::Arc<orm_mysql::scylla::Session>, where_sql: String, where_in_vars: impl Into<VecInto<T>>, limit_v: Option<isize>) -> common_uu::IResult<Vec<Self>> {
 
                 let ref where_in_vars = where_in_vars.into().0;
 
@@ -91,16 +90,15 @@ pub fn db_query(input: TokenStream) -> TokenStream {
                         debug!("db_query in var ele.len: {}", where_sql.len());
 
                         // 带wherein条件的情况
-                        use orm_uu::scylladb::ScyllaQuery;
-                        let query = ScyllaQuery::from(cql.clone()).wherein2(where_sql);
+                        let mut query = orm_mysql::scylla::query::Query::new(cql.clone());
+                        orm_mysql::scylladb::wherein2(&mut query, where_sql);
 
                         debug!("cql: {}", query.contents);
                         let mut rows = session.query(query, &[]).await?.rows()?;
                         r_rows.append(&mut rows);
                     }
                 }else{
-                    use orm_uu::scylladb::ScyllaQuery;
-                    let query = ScyllaQuery::from(cql.clone()).query;
+                    let query = orm_mysql::scylla::query::Query::new(cql.clone());
                     debug!("cql: {}", query.contents);
                     let mut rows = session.query(query, &[]).await?.rows()?;
                     r_rows.append(&mut rows);
@@ -130,3 +128,4 @@ pub fn db_query(input: TokenStream) -> TokenStream {
     // empty.into()
     code.into()
 }
+

@@ -59,7 +59,7 @@ pub fn cache_query_macro(input: TokenStream) -> TokenStream {
 
     let code1 = quote::quote! {
         use redis_async_pool::*;
-        use orm_uu::conv_data::*;
+        use orm_mysql::conv_data::*;
         use redis_cluster_async::redis::*;
 
         impl #ident{
