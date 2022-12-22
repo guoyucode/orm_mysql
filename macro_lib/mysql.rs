@@ -1,4 +1,4 @@
-use common_uu::{dev_or_prod, string::StringExentd};
+use common_uu::{string::StringExentd};
 use proc_macro::TokenStream;
 use quote::ToTokens;
 use syn::{Data, Fields};
@@ -156,13 +156,14 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             C: mysql_async::prelude::Queryable + Send + Sync
         {
 
-            let mut params = vec![self].into_iter().map(|Self{#(#fields_ident_init),*}| (#(#fields_ident_init),*)).collect::<Vec<_>>();
+            let Self{#(#fields_ident_init),*} = self;
+            let param = (#(#fields_ident_init),*);
             let sql = format!("insert into {table_name_var} ({table_fields})values({query_quest})",
                 table_name_var = #table_name,
                 table_fields = #table_fields_str, 
                 query_quest = #query_quest,
             );
-            let r: Option<(i64, )> = conn.exec_first(sql, params.remove(0)).await?;
+            let r: Option<(i64, )> = conn.exec_first(sql, param).await?;
             let r = r.map(|v|v.0);
             Ok(r)
         }
