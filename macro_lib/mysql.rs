@@ -99,6 +99,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
 
     let code = quote::quote! {
     use mysql_async::prelude::*;
+    use orm_uu::mysql::con_value::*;
 
     impl From<#struct_name> for mysql_async::Params{
         fn from(#struct_name{ #(#fields_ident_init),* }: #struct_name) -> Self{
@@ -106,10 +107,21 @@ pub fn db_query(input: TokenStream) -> TokenStream {
         }
     }
 
+    impl mysql_async::prelude::FromRow for #struct_name {
+        fn from_row_opt(row: mysql_async::Row) -> Result<Self, mysql_async::FromRowError>
+        where Self: Sized,
+        {
+            let err = mysql_async::FromRowError(row.clone());
+            Ok(#struct_name {
+                #(#fields_ident_init : row[#table_fields_ident].conv().map_err(|_|err.clone())? ),*
+            })
+        }
+    }
+
     #[orm_uu::async_trait::async_trait]
     impl orm_uu::mysql::OrmMySqlTrait for #struct_name {
 
-        async fn query_list<C>(
+        async fn query<C>(
             comm: &mut C,
             where_sql: &str,
             limit: Option<usize>,
@@ -134,13 +146,11 @@ pub fn db_query(input: TokenStream) -> TokenStream {
 
             // println!("sql: {}", sql);
 
-            let r = comm
-                .query_map(sql, |(#(#fields_ident_init),*)| Self { #(#fields_ident_init),* })
-                .await?;
+            let r = comm.query(sql).await?;
             Ok(r)
         }
 
-        async fn query<C>(
+        async fn query_first<C>(
             comm: &mut C,
             where_sql: &str,
         ) -> common_uu::IResult<Option<Self>>
@@ -148,12 +158,14 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             Self: Sized,
             C: Queryable + Send + Sync,
         {
-            let mut r = Self::query_list(comm, where_sql, Some(1)).await?;
-            match r.len(){
-                0 => return Ok(None),
-                1 => return Ok(Some(r.remove(0))),
-                _ => return Err(format!("'{where_sql}' find more row data!", where_sql = where_sql))?,
-            }
+            let table_name_var = #table_name;
+            let mut sql = format!("select {select_sql} from {table_name_var} {where_sql} limit 1",
+                select_sql = #table_fields_str,
+                table_name_var = table_name_var,
+                where_sql = where_sql,
+            );
+            let r = comm.query_first(sql).await?;
+            Ok(r)
         }
 
         async fn insert<C>(self, conn: &mut C) -> common_uu::IResult<Option<i64>>
@@ -173,5 +185,8 @@ pub fn db_query(input: TokenStream) -> TokenStream {
     }
 
     };
+
+    // println!("code: {}", code);
+
     code.into()
 }

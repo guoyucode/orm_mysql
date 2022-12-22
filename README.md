@@ -9,6 +9,9 @@ The function is being developed rapidly. Those who are interested can participat
 Join us: WeChat: wx_essence, Telegram: tg_essence;
 >加入我们: 微信: wx_essence, Telegram: tg_essence;
 
+[examples mysql_all](https://github.com/guoyucode/orm_mysql/blob/main/examples/mysql_all.rs)
+[examples mysql_insert](https://github.com/guoyucode/orm_mysql/blob/main/examples/mysql_insert.rs)
+[examples mysql_query](https://github.com/guoyucode/orm_mysql/blob/main/examples/mysql_query.rs)
 
 examples:
 
@@ -18,19 +21,19 @@ examples:
         let mut tx = pool.start_transaction(mysql_async::TxOpts::new()).await?;
 
         // use connection
-        let list = UserData::query_list(&mut conn, "where 1 != 1", None).await?;
-        // sql: select user_id,username from users where 1 != 1
-        println!("find count: {}", list.len());
+        let query_first = UserData::query_first(&mut conn, "where 1 != 1", None).await?;
+        // sql: select user_id,username from users where 1 != 1 limit 1
+        println!("find: {:?}", query_first);
 
         // use transaction
-        let list = UserData::query_list(&mut tx, "where 1=1", Some(1000)).await?;
-        // sql: select user_id,username from users where 1=1 limit 1000
-        println!("find count: {}", list.len());
-
-        // query_one
-        let one = UserData::query(&mut tx, "where 1=1").await?;
+        let query_first = UserData::query_first(&mut tx, "where 1=1", Some(1000)).await?;
         // sql: select user_id,username from users where 1=1 limit 1
-        println!("find count: {:?}", one.is_some());
+        println!("find: {:?}", query_first);
+
+        // query_list
+        let list = UserData::query(&mut tx, "where 1=1").await?;
+        // sql: select user_id,username from users where 1=1 limit 1
+        println!("find count: {:?}", list);
 
         // insert into data
         let user = UserData{user_id: 5, username:"123".to_string()};
