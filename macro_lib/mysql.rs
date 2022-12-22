@@ -98,7 +98,13 @@ pub fn db_query(input: TokenStream) -> TokenStream {
     let table_fields_str = table_fields_ident.join(",");
 
     let code = quote::quote! {
-    use orm_uu::mysql_async::prelude::*;
+    use mysql_async::prelude::*;
+
+    impl From<#struct_name> for mysql_async::Params{
+        fn from(#struct_name{ #(#fields_ident_init),* }: #struct_name) -> Self{
+            mysql_async::Params::Positional(vec![#(#fields_ident_init .to_value()),*])
+        }
+    }
 
     #[orm_uu::async_trait::async_trait]
     impl orm_uu::mysql::OrmMySqlTrait for #struct_name {
@@ -110,7 +116,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
         ) -> common_uu::IResult<Vec<Self>>
         where
             Self: Sized,
-            C: mysql_async::prelude::Queryable + Send + Sync,
+            C: Queryable + Send + Sync,
         {
 
             let table_name_var = #table_name;
@@ -140,7 +146,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
         ) -> common_uu::IResult<Option<Self>>
         where
             Self: Sized,
-            C: mysql_async::prelude::Queryable + Send + Sync,
+            C: Queryable + Send + Sync,
         {
             let mut r = Self::query_list(comm, where_sql, Some(1)).await?;
             match r.len(){
@@ -153,17 +159,14 @@ pub fn db_query(input: TokenStream) -> TokenStream {
         async fn insert<C>(self, conn: &mut C) -> common_uu::IResult<Option<i64>>
         where
             Self: Sized,
-            C: mysql_async::prelude::Queryable + Send + Sync
+            C: Queryable + Send + Sync
         {
-
-            let Self{#(#fields_ident_init),*} = self;
-            let param = (#(#fields_ident_init),*);
             let sql = format!("insert into {table_name_var} ({table_fields})values({query_quest})",
                 table_name_var = #table_name,
                 table_fields = #table_fields_str, 
                 query_quest = #query_quest,
             );
-            let r: Option<(i64, )> = conn.exec_first(sql, param).await?;
+            let r: Option<(i64, )> = conn.exec_first(sql, self).await?;
             let r = r.map(|v|v.0);
             Ok(r)
         }
