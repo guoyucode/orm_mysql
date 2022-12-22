@@ -52,7 +52,7 @@ async fn main() -> common_uu::IResult {
     println!(r##"UserData::query_first {:?}"##, r);
 
     // let r: Vec<UserData> = conn.query("select * from users_temp").await?;
-    let r: Vec<UserData> = UserData::query(&mut conn, "where 1=1", Some(1)).await?;
+    let r: Vec<UserData> = UserData::query(&mut conn, "where 1=1", Some(99)).await?;
     println!("UserData::query: {:?}", r);
 
     Ok(())
