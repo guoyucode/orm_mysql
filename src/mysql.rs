@@ -24,6 +24,23 @@ pub trait OrmMySqlTrait {
     where
         Self: Sized,
         C: mysql_async::prelude::Queryable + Send + Sync;
+
+    async fn update<C>(
+        self,
+        comm: &mut C,
+    ) -> common_uu::IResult<Option<i64>>
+    where
+        Self: Sized,
+        C: mysql_async::prelude::Queryable + Send + Sync;
+
+    async fn delete<C>(
+        self,
+        comm: &mut C,
+    ) -> common_uu::IResult<Option<i64>>
+    where
+        Self: Sized,
+        C: mysql_async::prelude::Queryable + Send + Sync;
+
 }
 
 

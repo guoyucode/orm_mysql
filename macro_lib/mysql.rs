@@ -64,10 +64,26 @@ pub fn db_query(input: TokenStream) -> TokenStream {
     let mut tys = vec![];
     let mut table_fields_ident = vec![];
     let mut fields_ident_init = vec![];
+    
+    let mut id_field_str = String::new();
+    let mut id_field_ident = syn::Ident::new_raw("id", proc_macro2::Span::call_site());
 
     for ele in fields.named {
-        let mut table_field_name = ele.ident.unwrap().to_string();
+        let ident = ele.ident.unwrap();
+        let mut table_field_name = ident.to_string();
         let ty = ele.ty.to_token_stream();
+
+        let attrs = ele.attrs.iter().map(|x| x.parse_meta().unwrap()).collect::<Vec<_>>();
+        for ele in attrs {
+            if let syn::Meta::List(path) = &ele{
+                let seg = path.path.segments.clone().into_token_stream().to_string();
+                let id = path.nested.clone().into_token_stream().to_string();
+                if seg == "orm_mysql" && id.trim() == "id"{
+                    id_field_str = table_field_name.clone();
+                    id_field_ident = ident.clone();
+                }
+            }
+        }
 
         let attrs = ele.attrs.iter().find(|v| {
             let path = v.path.to_token_stream().to_string();
@@ -89,6 +105,10 @@ pub fn db_query(input: TokenStream) -> TokenStream {
         tys.push(ty);
     }
 
+    // if id_field_str.is_empty(){
+    //     panic!("Please configure #[orm_mysql(id)]");
+    // }
+
     let mut query_quest = vec![];
     for _ in &table_fields_ident {
         query_quest.push("?");
@@ -96,6 +116,9 @@ pub fn db_query(input: TokenStream) -> TokenStream {
 
     let query_quest = query_quest.join(",");
     let table_fields_str = table_fields_ident.join(",");
+    
+    let table_fields_update_str = table_fields_ident.join("=?,");
+    let table_fields_update_str = table_fields_update_str.trim_end_matches(",");
 
     let code = quote::quote! {
     use mysql_async::prelude::*;
@@ -181,6 +204,35 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             let r: Option<(i64, )> = conn.exec_first(sql, self).await?;
             let r = r.map(|v|v.0);
             Ok(r)
+        }
+
+        async fn update<C>(self, conn: &mut C) -> common_uu::IResult<Option<i64>>
+        where
+            Self: Sized,
+            C: Queryable + Send + Sync
+        {
+            let sql = format!("update {table_name_var} set ({table_fields})",
+                table_name_var = #table_name,
+                table_fields = #table_fields_update_str, 
+            );
+            let r: Option<(i64, )> = conn.exec_first(sql, self).await?;
+            let r = r.map(|v|v.0);
+            Ok(r)
+        }
+
+        async fn delete<C>(self, conn: &mut C) -> common_uu::IResult<Option<i64>>
+        where
+            Self: Sized,
+            C: Queryable + Send + Sync
+        {
+            let sql = format!("delete from {table_name_var} where {where_var}=?",
+                table_name_var = #table_name,
+                where_var = #id_field_str,
+            );
+            // let r: Option<(i64, )> = conn.exec_first(sql, self.#id_field_ident).await?;
+            // let r = r.map(|v|v.0);
+            // Ok(r)
+            todo!("delete")
         }
     }
 

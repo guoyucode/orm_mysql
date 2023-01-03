@@ -62,6 +62,7 @@ async fn main() -> common_uu::IResult {
 #[derive(OrmMySql, Default, Debug)]
 #[orm_mysql(table_name=users_temp)] // is not config: table_name => user_data
 struct UserData {
+    #[orm_mysql(id)]
     user_id: i64,
     username: String,
     username2: Option<String>,
