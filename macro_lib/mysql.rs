@@ -220,19 +220,19 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             Ok(r)
         }
 
-        async fn delete<C>(self, conn: &mut C) -> common_uu::IResult<Option<i64>>
+        async fn delete<C>(&self, conn: &mut C) -> common_uu::IResult<Option<i64>>
         where
             Self: Sized,
             C: Queryable + Send + Sync
         {
-            let sql = format!("delete from {table_name_var} where {where_var}=?",
+            let sql = format!("delete from {table_name_var} where {where_var}={val}",
                 table_name_var = #table_name,
                 where_var = #id_field_str,
+                val = serde_json::json!(self.#id_field_ident).to_string()
             );
-            // let r: Option<(i64, )> = conn.exec_first(sql, self.#id_field_ident).await?;
-            // let r = r.map(|v|v.0);
-            // Ok(r)
-            todo!("delete")
+            let r: Option<(i64, )> = conn.exec_first(sql, ()).await?;
+            let r = r.map(|v|v.0);
+            Ok(r)
         }
     }
 

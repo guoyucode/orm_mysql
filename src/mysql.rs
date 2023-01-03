@@ -34,7 +34,7 @@ pub trait OrmMySqlTrait {
         C: mysql_async::prelude::Queryable + Send + Sync;
 
     async fn delete<C>(
-        self,
+        &self,
         comm: &mut C,
     ) -> common_uu::IResult<Option<i64>>
     where
