@@ -9,49 +9,115 @@ pub trait OrmMySqlTrait {
         Self: Sized,
         C: mysql_async::prelude::Queryable + Send + Sync;
 
-    async fn query_first<C>(
-        comm: &mut C,
-        where_sql: &str,
-    ) -> common_uu::IResult<Option<Self>>
+    async fn query_first<C>(comm: &mut C, where_sql: &str) -> common_uu::IResult<Option<Self>>
     where
         Self: Sized,
         C: mysql_async::prelude::Queryable + Send + Sync;
 
-    async fn insert<C>(
-        self,
-        comm: &mut C,
-    ) -> common_uu::IResult<Option<i64>>
+    async fn insert<C>(self, comm: &mut C) -> common_uu::IResult<Option<i64>>
     where
         Self: Sized,
         C: mysql_async::prelude::Queryable + Send + Sync;
 
-    async fn update<C>(
-        self,
-        comm: &mut C,
-    ) -> common_uu::IResult<Option<i64>>
+    async fn update<C>(self, comm: &mut C) -> common_uu::IResult<Option<i64>>
     where
         Self: Sized,
         C: mysql_async::prelude::Queryable + Send + Sync;
 
-    async fn delete<C>(
-        &self,
-        comm: &mut C,
-    ) -> common_uu::IResult<Option<i64>>
+    async fn delete<C>(&self, comm: &mut C) -> common_uu::IResult<Option<i64>>
     where
         Self: Sized,
         C: mysql_async::prelude::Queryable + Send + Sync;
-
 }
 
+pub mod con_value2 {
+    use std::ops::AddAssign;
 
-pub mod con_value{
     pub trait ValueConv<T> {
         fn conv(&self) -> common_uu::IResult<T>;
     }
 
+    #[cfg(feature = "chrono")]
+    impl ValueConv<chrono::DateTime<chrono::Local>> for mysql_async::Value {
+        fn conv(&self) -> common_uu::IResult<chrono::DateTime<chrono::Local>> {
+            let v = match self.clone() {
+                mysql_async::Value::Int(timestament) => {
+                    use chrono::TimeZone;
+                    let dt = chrono::Local.timestamp(timestament as i64, 0);
+                    dt
+                }
+                mysql_async::Value::UInt(timestament) => {
+                    use chrono::TimeZone;
+                    let dt = chrono::Local.timestamp(timestament as i64, 0);
+                    dt
+                }
+                mysql_async::Value::Time(_is_negative, days, hours, minutes, seconds, micro) => {
+                    let mut v = chrono::NaiveTime::from_hms(0, 0, 0);
+                    v = v + chrono::Duration::days(days as i64);
+                    v = v + chrono::Duration::hours(hours as i64);
+                    v = v + chrono::Duration::minutes(minutes as i64);
+                    v = v + chrono::Duration::seconds(seconds as i64);
+                    v = v + chrono::Duration::microseconds(micro as i64);
+                    // if is_negative{
+                    //     v = v.checked_neg().unwrap();
+                    // }
+                    chrono::Local::now().date().and_time(v).unwrap_or_default()
+                }
+                mysql_async::Value::Date(year, month, day, hour, minutes, seconds, micro) => {
+                    use chrono::TimeZone;
+                    let dt = chrono::Local
+                        .ymd(year as i32, month as u32, day as u32)
+                        .and_hms_micro(hour as u32, minutes as u32, seconds as u32, micro as u32);
+                    dt
+                }
+                other => Err(format!("ValueConv Error: {:?}", other))?,
+            };
+            Ok(v)
+        }
+    }
+
+    #[cfg(feature = "chrono")]
+    impl ValueConv<chrono::DateTime<chrono::Utc>> for mysql_async::Value {
+        fn conv(&self) -> common_uu::IResult<chrono::DateTime<chrono::Utc>> {
+            let v = match self.clone() {
+                mysql_async::Value::Int(timestament) => {
+                    use chrono::TimeZone;
+                    let dt = chrono::Utc.timestamp(timestament as i64, 0);
+                    dt
+                }
+                mysql_async::Value::UInt(timestament) => {
+                    use chrono::TimeZone;
+                    let dt = chrono::Utc.timestamp(timestament as i64, 0);
+                    dt
+                }
+                mysql_async::Value::Time(_is_negative, days, hours, minutes, seconds, micro) => {
+                    let mut v = chrono::NaiveTime::from_hms(0, 0, 0);
+                    v = v + chrono::Duration::days(days as i64);
+                    v = v + chrono::Duration::hours(hours as i64);
+                    v = v + chrono::Duration::minutes(minutes as i64);
+                    v = v + chrono::Duration::seconds(seconds as i64);
+                    v = v + chrono::Duration::microseconds(micro as i64);
+                    // if is_negative{
+                    //     v = v.checked_neg().unwrap();
+                    // }
+                    chrono::Utc::now().date().and_time(v).unwrap_or_default()
+                }
+                mysql_async::Value::Date(year, month, day, hour, minutes, seconds, micro) => {
+                    use chrono::TimeZone;
+                    let dt = chrono::Utc
+                        .ymd(year as i32, month as u32, day as u32)
+                        .and_hms_micro(hour as u32, minutes as u32, seconds as u32, micro as u32);
+                    dt
+                }
+                other => Err(format!("ValueConv Error: {:?}", other))?,
+            };
+            Ok(v)
+        }
+    }
+
     impl ValueConv<f64> for mysql_async::Value {
-        fn conv(&self) -> common_uu::IResult<f64>{
-            let v = match self.clone(){
+        fn conv(&self) -> common_uu::IResult<f64> {
+            let v = match self.clone() {
                 mysql_async::Value::NULL => 0.0,
                 mysql_async::Value::Bytes(v) => String::from_utf8(v)?.parse()?,
                 mysql_async::Value::Int(v) => v as f64,
@@ -65,8 +131,8 @@ pub mod con_value{
     }
 
     impl ValueConv<f32> for mysql_async::Value {
-        fn conv(&self) -> common_uu::IResult<f32>{
-            let v = match self.clone(){
+        fn conv(&self) -> common_uu::IResult<f32> {
+            let v = match self.clone() {
                 mysql_async::Value::NULL => 0.0,
                 mysql_async::Value::Bytes(v) => String::from_utf8(v)?.parse()?,
                 mysql_async::Value::Int(v) => v as f32,
@@ -78,10 +144,10 @@ pub mod con_value{
             Ok(v)
         }
     }
-    
+
     impl ValueConv<isize> for mysql_async::Value {
-        fn conv(&self) -> common_uu::IResult<isize>{
-            let v = match self.clone(){
+        fn conv(&self) -> common_uu::IResult<isize> {
+            let v = match self.clone() {
                 mysql_async::Value::NULL => 0,
                 mysql_async::Value::Bytes(v) => String::from_utf8(v)?.parse()?,
                 mysql_async::Value::Int(v) => v as isize,
@@ -94,10 +160,9 @@ pub mod con_value{
         }
     }
 
-    
     impl ValueConv<usize> for mysql_async::Value {
-        fn conv(&self) -> common_uu::IResult<usize>{
-            let v = match self.clone(){
+        fn conv(&self) -> common_uu::IResult<usize> {
+            let v = match self.clone() {
                 mysql_async::Value::NULL => 0,
                 mysql_async::Value::Bytes(v) => String::from_utf8(v)?.parse()?,
                 mysql_async::Value::Int(v) => v as usize,
@@ -111,8 +176,8 @@ pub mod con_value{
     }
 
     impl ValueConv<u8> for mysql_async::Value {
-        fn conv(&self) -> common_uu::IResult<u8>{
-            let v = match self.clone(){
+        fn conv(&self) -> common_uu::IResult<u8> {
+            let v = match self.clone() {
                 mysql_async::Value::NULL => 0,
                 mysql_async::Value::Bytes(v) => String::from_utf8(v)?.parse()?,
                 mysql_async::Value::Int(v) => v as u8,
@@ -124,10 +189,10 @@ pub mod con_value{
             Ok(v)
         }
     }
-    
+
     impl ValueConv<i32> for mysql_async::Value {
-        fn conv(&self) -> common_uu::IResult<i32>{
-            let v = match self.clone(){
+        fn conv(&self) -> common_uu::IResult<i32> {
+            let v = match self.clone() {
                 mysql_async::Value::NULL => 0,
                 mysql_async::Value::Bytes(v) => String::from_utf8(v)?.parse()?,
                 mysql_async::Value::Int(v) => v as i32,
@@ -139,10 +204,10 @@ pub mod con_value{
             Ok(v)
         }
     }
-    
+
     impl ValueConv<i64> for mysql_async::Value {
-        fn conv(&self) -> common_uu::IResult<i64>{
-            let v = match self.clone(){
+        fn conv(&self) -> common_uu::IResult<i64> {
+            let v = match self.clone() {
                 mysql_async::Value::NULL => 0,
                 mysql_async::Value::Bytes(v) => String::from_utf8(v)?.parse()?,
                 mysql_async::Value::Int(v) => v,
@@ -154,10 +219,10 @@ pub mod con_value{
             Ok(v)
         }
     }
-    
+
     impl ValueConv<String> for mysql_async::Value {
-        fn conv(&self) -> common_uu::IResult<String>{
-            let v = match self.clone(){
+        fn conv(&self) -> common_uu::IResult<String> {
+            let v = match self.clone() {
                 mysql_async::Value::NULL => "".into(),
                 mysql_async::Value::Bytes(v) => String::from_utf8(v)?,
                 mysql_async::Value::Int(v) => v.to_string(),
@@ -169,9 +234,9 @@ pub mod con_value{
             Ok(v)
         }
     }
-    
+
     impl ValueConv<Option<String>> for mysql_async::Value {
-        fn conv(&self) -> common_uu::IResult<Option<String>>{
+        fn conv(&self) -> common_uu::IResult<Option<String>> {
             let v = match self.clone() {
                 mysql_async::Value::NULL => return Ok(None),
                 mysql_async::Value::Bytes(v) => String::from_utf8(v)?,
@@ -184,5 +249,4 @@ pub mod con_value{
             Ok(Some(v))
         }
     }
-    
 }

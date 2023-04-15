@@ -122,7 +122,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
 
     let code = quote::quote! {
     use mysql_async::prelude::*;
-    use orm_mysql::mysql::con_value::*;
+    // use orm_mysql::mysql::con_value::*;
 
     impl From<#struct_name> for mysql_async::Params{
         fn from(#struct_name{ #(#fields_ident_init),* }: #struct_name) -> Self{
@@ -136,7 +136,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
         {
             let err = mysql_async::FromRowError(row.clone());
             Ok(#struct_name {
-                #(#fields_ident_init : row[#table_fields_ident].conv().map_err(|_|err.clone())? ),*
+                #(#fields_ident_init : row[#table_fields_ident].try_into().map_err(|_|err.clone())? ),*
             })
         }
     }

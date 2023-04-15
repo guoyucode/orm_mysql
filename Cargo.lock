@@ -1212,6 +1212,7 @@ name = "orm_mysql"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "chrono",
  "common_uu",
  "log",
  "macro_lib",

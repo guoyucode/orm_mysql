@@ -8,14 +8,15 @@ path = "src/lib.rs"
 
 
 [dependencies]
+chrono = { version = "*", optional = true }
 macro_lib = {path = "./macro_lib"}
 log = "*"
 serde_json = { version = "1.0", features = ["preserve_order"] }
 common_uu = {git = "https://gitee.com/guoyucode/common_uu.git", default-features = false}
 serde = { version = "1.0", features = ["derive"] }
 mysql_async = "0.31"
+# mysql_async = {version = "0.31", features = ["mysql_common/chrono"]}
 async-trait = "0.1.60"
-
 
 [dev-dependencies]
 log = "*"
@@ -26,4 +27,4 @@ tokio = { version = "1.13", features = ["rt", "rt-multi-thread", "macros", ] }
 
 
 [features]
-default = []
+default = ["chrono"]

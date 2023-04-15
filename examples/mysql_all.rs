@@ -36,7 +36,7 @@ async fn main() -> common_uu::IResult {
     let mut user = UserData::default();
     user.user_id = 1;
     user.username = "11".to_string();
-    user.username2 = Some("111".to_string());
+    // user.username2 = Some("111".to_string());
     user.insert(&mut conn).await?;
 
     // use transaction
@@ -44,9 +44,11 @@ async fn main() -> common_uu::IResult {
     let mut user = UserData::default();
     user.user_id = 2;
     user.username = "22".to_string();
-    user.username2 = Some("222".to_string());
+    // user.username2 = Some("222".to_string());
     user.insert(&mut tx).await?;
     tx.commit().await?;
+
+    let now = chrono::Local::now();
 
     // let r: Option<UserData> = conn.query_first("select * from users_temp").await?;
     let r: Option<UserData> = UserData::query_first(&mut conn, "where 1=1").await?;
@@ -64,21 +66,23 @@ async fn main() -> common_uu::IResult {
 #[orm_mysql(table_name=users_temp)] // is not config: table_name => user_data
 struct UserData {
     #[orm_mysql(id)]
-    user_id: i64,
+    user_id: i32,
     username: String,
-    username2: Option<String>,
-    username3: Option<String>,
-    username4: Option<String>,
-    username5: Option<String>,
-    username6: Option<String>,
-    username7: Option<String>,
-    username8: Option<String>,
-    username9: Option<String>,
-    username10: Option<String>,
-    username11: Option<String>,
-    username12: Option<String>,
+    // username2: Option<String>,
+    // username3: Option<String>,
+    // username4: Option<String>,
+    // username5: Option<String>,
+    // username6: Option<String>,
+    // username7: Option<String>,
+    // username8: Option<String>,
+    // username9: Option<String>,
+    // username10: Option<String>,
+    // username11: Option<String>,
+    // username12: Option<String>,
     username13: String,
     username14: String,
     username15: String,
-    float_v: f64,
+    float_v: f32,
+    // datatime_local_V: Option<chrono::DateTime<chrono::Local>>,
+    // datatime_utc_V: Option<chrono::DateTime<chrono::Utc>>,
 }
