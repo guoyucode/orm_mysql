@@ -81,4 +81,14 @@ struct UserData {
     username14: String,
     username15: String,
     float_v: f64,
+
+    // not support
+    // datetime_utc_v: Option<chrono::DateTime<chrono::Utc>>,
+    // datetime_local_v: chrono::DateTime<chrono::Local>,
+
+    naive_time_v: chrono::NaiveTime,
+    naive_time_opt_v: Option<chrono::NaiveTime>,
+
+    naive_date_time_v: chrono::NaiveDateTime,
+    naive_date_time_opt_v: Option<chrono::NaiveDateTime>,
 }
