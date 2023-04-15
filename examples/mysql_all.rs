@@ -25,7 +25,8 @@ async fn main() -> common_uu::IResult {
         username12      varchar(128) null,
         username13      varchar(128) null,
         username14      varchar(128) null,
-        username15      varchar(128) null
+        username15      varchar(128) null,
+        float_v      float(8,2) null
     )"
     .ignore(&mut conn)
     .await?;
@@ -79,4 +80,5 @@ struct UserData {
     username13: String,
     username14: String,
     username15: String,
+    float_v: f64,
 }
