@@ -1,4 +1,5 @@
 use common_uu::{string::StringExentd};
+use mysql_common::frunk::labelled::chars::{R, O};
 use proc_macro::TokenStream;
 use quote::ToTokens;
 use syn::{Data, Fields};
@@ -120,6 +121,14 @@ pub fn db_query(input: TokenStream) -> TokenStream {
     let table_fields_update_str = table_fields_ident.join("=?,");
     let table_fields_update_str = table_fields_update_str.trim_end_matches(",");
 
+    use mysql_common::value::convert::ParseIrOpt;
+    fn from_row_opt<V, T: TryInto<ParseIrOpt<V>>>(row: mysql_async::Row, k: &str) -> Result<V, mysql_async::FromRowError>{
+        let err = mysql_async::FromRowError(row.clone());
+        let r: mysql_common::value::convert::ParseIrOpt<V> = row[k].clone().try_into().map_err(|_|err.clone())?;
+        let v = r.commit();
+        Ok(v)
+    }
+
     let code = quote::quote! {
     use mysql_async::prelude::*;
     // use orm_mysql::mysql::con_value::*;
@@ -135,9 +144,16 @@ pub fn db_query(input: TokenStream) -> TokenStream {
         where Self: Sized,
         {
             let err = mysql_async::FromRowError(row.clone());
-            Ok(#struct_name {
-                #(#fields_ident_init : row[#table_fields_ident].try_into().map_err(|_|err.clone())? ),*
-            })
+
+            // #(#fields_ident_init : row[#table_fields_ident].clone().try_into().map_err(|_|err.clone())? ),*
+
+            // Ok(#struct_name {
+            //     #(#fields_ident_init : row[#table_fields_ident].try_into().map_err(|_|err.clone())? ),*
+            // })
+            // Ok(#struct_name {
+            //     #(#fields_ident_init : row[#table_fields_ident].clone().try_into().map_err(|_|err.clone())? ),*
+            // })
+            todo!()
         }
     }
 

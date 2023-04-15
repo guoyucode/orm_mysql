@@ -14,7 +14,8 @@ log = "*"
 serde_json = { version = "1.0", features = ["preserve_order"] }
 common_uu = {git = "https://gitee.com/guoyucode/common_uu.git", default-features = false}
 serde = { version = "1.0", features = ["derive"] }
-mysql_async = "0.31"
+# mysql_async = "0.31"
+mysql_async = {path = "../mysql_async"}
 # mysql_async = {version = "0.31", features = ["mysql_common/chrono"]}
 async-trait = "0.1.60"
 

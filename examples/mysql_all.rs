@@ -34,7 +34,7 @@ async fn main() -> common_uu::IResult {
     // use conn insert 
     // let r: Option<i64>=conn.exec_first("insert into users_temp (user_id, username, username2)values(?,?,?)", (1, "11".to_string(), Some("111".to_string()))).await?;
     let mut user = UserData::default();
-    user.user_id = 1;
+    // user.user_id = 1;
     user.username = "11".to_string();
     // user.username2 = Some("111".to_string());
     user.insert(&mut conn).await?;
@@ -42,7 +42,7 @@ async fn main() -> common_uu::IResult {
     // use transaction
     let mut tx = pool.start_transaction(mysql_async::TxOpts::new()).await?;
     let mut user = UserData::default();
-    user.user_id = 2;
+    // user.user_id = 2;
     user.username = "22".to_string();
     // user.username2 = Some("222".to_string());
     user.insert(&mut tx).await?;
@@ -66,7 +66,7 @@ async fn main() -> common_uu::IResult {
 #[orm_mysql(table_name=users_temp)] // is not config: table_name => user_data
 struct UserData {
     #[orm_mysql(id)]
-    user_id: i32,
+    user_id: String,
     username: String,
     // username2: Option<String>,
     // username3: Option<String>,
@@ -82,7 +82,7 @@ struct UserData {
     username13: String,
     username14: String,
     username15: String,
-    float_v: f32,
-    // datatime_local_V: Option<chrono::DateTime<chrono::Local>>,
+    // float_v: i32,
+    datatime_local_V: Option<chrono::DateTime<chrono::Local>>,
     // datatime_utc_V: Option<chrono::DateTime<chrono::Utc>>,
 }

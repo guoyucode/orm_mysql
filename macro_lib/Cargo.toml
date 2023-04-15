@@ -14,3 +14,9 @@ quote = "1"
 proc-macro2 = "1"
 serde_json = { version = "1.0", features = ["preserve_order"] }
 common_uu = {git = "https://gitee.com/guoyucode/common_uu.git", default-features = false}
+# mysql_async = "0.31"
+mysql_async = {path = "../../mysql_async"}
+mysql_common = { path = "../../rust_mysql_common", default-features = false, features = [
+    "derive",
+    "chrono",
+] }
