@@ -1,4 +1,4 @@
-use mysql_async::prelude::*;
+use orm_mysql::mysql_async::prelude::*;
 use orm_mysql::mysql::OrmMySqlTrait;
 use orm_mysql::OrmMySql;
 
