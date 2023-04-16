@@ -121,20 +121,20 @@ pub fn db_query(input: TokenStream) -> TokenStream {
     let table_fields_update_str = table_fields_update_str.trim_end_matches(",");
 
     let code = quote::quote! {
-    use mysql_async::prelude::*;
+    use orm_mysql::mysql_async::prelude::*;
     use orm_mysql::mysql::con_value::*;
 
-    impl From<#struct_name> for mysql_async::Params{
+    impl From<#struct_name> for orm_mysql::mysql_async::Params{
         fn from(#struct_name{ #(#fields_ident_init),* }: #struct_name) -> Self{
-            mysql_async::Params::Positional(vec![#(#fields_ident_init .to_value()),*])
+            orm_mysql::mysql_async::Params::Positional(vec![#(#fields_ident_init .to_value()),*])
         }
     }
 
-    impl mysql_async::prelude::FromRow for #struct_name {
-        fn from_row_opt(row: mysql_async::Row) -> Result<Self, mysql_async::FromRowError>
+    impl orm_mysql::mysql_async::prelude::FromRow for #struct_name {
+        fn from_row_opt(row: orm_mysql::mysql_async::Row) -> Result<Self, orm_mysql::mysql_async::FromRowError>
         where Self: Sized,
         {
-            let err = mysql_async::FromRowError(row.clone());
+            let err = orm_mysql::mysql_async::FromRowError(row.clone());
             Ok(#struct_name {
                 #(#fields_ident_init : row[#table_fields_ident].conv().map_err(|_|err.clone())? ),*
             })
