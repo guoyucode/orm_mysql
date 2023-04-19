@@ -85,6 +85,8 @@ struct UserData {
     // not support
     // datetime_utc_v: Option<chrono::DateTime<chrono::Utc>>,
     // datetime_local_v: chrono::DateTime<chrono::Local>,
+    naive_date_v: chrono::NaiveDate,
+    naive_date_opt_v: Option<chrono::NaiveDate>,
 
     naive_time_v: chrono::NaiveTime,
     naive_time_opt_v: Option<chrono::NaiveTime>,

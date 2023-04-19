@@ -101,6 +101,41 @@ pub mod con_value {
     }
 
     #[cfg(feature = "chrono")]
+    impl ValueConv<chrono::NaiveDate> for mysql_async::Value {
+        fn conv(&self) -> common_uu::IResult<chrono::NaiveDate> {
+            let v = match self.clone() {
+                mysql_async::Value::Date(year, month, day, hour, minutes, seconds, micro) => {
+                    chrono::NaiveDate::parse_from_str(
+                        &format!(
+                            "{year}-{month}-{day}"
+                        ),
+                        "%Y-%m-%d",
+                    )
+                }
+                mysql_async::Value::Time(_is_negative, days, hours, minutes, seconds, micro) => {
+                    let mut v = chrono::NaiveDate::from_ymd(1970, 1, 1);
+                    v = v + chrono::Duration::days(days as i64);
+                    Ok(v)
+                }
+                _ => {
+                    return Err("mysql_async deser tos chrono::NaiveDate")?;
+                }
+            }?;
+            Ok(v)
+        }
+    }
+    #[cfg(feature = "chrono")]
+    impl ValueConv<Option<chrono::NaiveDate>> for mysql_async::Value {
+        fn conv(&self) -> common_uu::IResult<Option<chrono::NaiveDate>> {
+            let v = match self.clone() {
+                mysql_async::Value::NULL => return Ok(None),
+                other => other.conv(),
+            }?;
+            Ok(Some(v))
+        }
+    }
+
+    #[cfg(feature = "chrono")]
     impl ValueConv<chrono::DateTime<chrono::Local>> for mysql_async::Value {
         fn conv(&self) -> common_uu::IResult<chrono::DateTime<chrono::Local>> {
             let v = match self.clone() {
