@@ -167,7 +167,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
 
             let sql = sql.as_str();
 
-            // println!("sql: {}", sql);
+            orm_mysql::log::debug!("query sql: {}", sql);
 
             let r = comm.query(sql).await?;
             Ok(r)
@@ -187,6 +187,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
                 table_name_var = table_name_var,
                 where_sql = where_sql,
             );
+            orm_mysql::log::debug!("query_first sql: {}", sql);
             let r = comm.query_first(sql).await?;
             Ok(r)
         }
@@ -201,6 +202,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
                 table_fields = #table_fields_str, 
                 query_quest = #query_quest,
             );
+            orm_mysql::log::debug!("insert sql: {}", sql);
             let r: Option<(i64, )> = conn.exec_first(sql, self).await?;
             let r = r.map(|v|v.0);
             Ok(r)
@@ -215,6 +217,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
                 table_name_var = #table_name,
                 table_fields = #table_fields_update_str, 
             );
+            orm_mysql::log::debug!("update sql: {}", sql);
             let r: Option<(i64, )> = conn.exec_first(sql, self).await?;
             let r = r.map(|v|v.0);
             Ok(r)
@@ -230,6 +233,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
                 where_var = #id_field_str,
                 val = serde_json::json!(self.#id_field_ident).to_string()
             );
+            orm_mysql::log::debug!("delete sql: {}", sql);
             let r: Option<(i64, )> = conn.exec_first(sql, ()).await?;
             let r = r.map(|v|v.0);
             Ok(r)
