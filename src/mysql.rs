@@ -39,6 +39,11 @@ pub mod con_value {
     impl ValueConv<chrono::NaiveTime> for mysql_async::Value {
         fn conv(&self) -> common_uu::IResult<chrono::NaiveTime> {
             let v = match self.clone() {
+                mysql_async::Value::Bytes(bytes) => {
+                    let s = String::from_utf8(bytes)?;
+                    let v = chrono::NaiveTime::parse_from_str(&s, "%H:%M:%S")?;
+                    v
+                }
                 mysql_async::Value::Time(_is_negative, days, hours, minutes, seconds, micro) => {
                     let mut v = chrono::NaiveTime::from_hms(0, 0, 0);
                     v = v + chrono::Duration::days(days as i64);
@@ -73,6 +78,10 @@ pub mod con_value {
     impl ValueConv<chrono::NaiveDateTime> for mysql_async::Value {
         fn conv(&self) -> common_uu::IResult<chrono::NaiveDateTime> {
             let v = match self.clone() {
+                mysql_async::Value::Bytes(bytes) => {
+                    let s = String::from_utf8(bytes)?;
+                    chrono::NaiveDateTime::parse_from_str(&s, "%Y-%m-%d %H:%M:%S")
+                }
                 mysql_async::Value::Date(year, month, day, hour, minutes, seconds, micro) => {
                     chrono::NaiveDateTime::parse_from_str(
                         &format!(
@@ -104,6 +113,10 @@ pub mod con_value {
     impl ValueConv<chrono::NaiveDate> for mysql_async::Value {
         fn conv(&self) -> common_uu::IResult<chrono::NaiveDate> {
             let v = match self.clone() {
+                mysql_async::Value::Bytes(bytes) => {
+                    let s = String::from_utf8(bytes)?;
+                    chrono::NaiveDate::parse_from_str(&s, "%Y-%m-%d")
+                }
                 mysql_async::Value::Date(year, month, day, hour, minutes, seconds, micro) => {
                     chrono::NaiveDate::parse_from_str(
                         &format!(
