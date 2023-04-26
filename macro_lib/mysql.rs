@@ -192,7 +192,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             Ok(r)
         }
 
-        async fn insert<C>(self, conn: &mut C) -> common_uu::IResult<Option<i64>>
+        async fn insert<C>(self, conn: &mut C) -> common_uu::IResult<i64>
         where
             Self: Sized,
             C: Queryable + Send + Sync
@@ -204,11 +204,11 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             );
             orm_mysql::log::debug!("insert sql: {}", sql);
             let r: Option<(i64, )> = conn.exec_first(sql, self).await?;
-            let r = r.map(|v|v.0);
+            let r = r.map(|v|v.0).unwrap_or_default();
             Ok(r)
         }
 
-        async fn update<C>(self, conn: &mut C) -> common_uu::IResult<Option<i64>>
+        async fn update<C>(self, conn: &mut C) -> common_uu::IResult<i64>
         where
             Self: Sized,
             C: Queryable + Send + Sync
@@ -219,11 +219,11 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             );
             orm_mysql::log::debug!("update sql: {}", sql);
             let r: Option<(i64, )> = conn.exec_first(sql, self).await?;
-            let r = r.map(|v|v.0);
+            let r = r.map(|v|v.0).unwrap_or_default();
             Ok(r)
         }
 
-        async fn delete<C>(&self, conn: &mut C) -> common_uu::IResult<Option<i64>>
+        async fn delete<C>(&self, conn: &mut C) -> common_uu::IResult<i64>
         where
             Self: Sized,
             C: Queryable + Send + Sync
@@ -235,7 +235,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             );
             orm_mysql::log::debug!("delete sql: {}", sql);
             let r: Option<(i64, )> = conn.exec_first(sql, ()).await?;
-            let r = r.map(|v|v.0);
+            let r = r.map(|v|v.0).unwrap_or_default();
             Ok(r)
         }
     }
