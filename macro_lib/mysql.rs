@@ -117,7 +117,9 @@ pub fn db_query(input: TokenStream) -> TokenStream {
     let query_quest = query_quest.join(",");
     let table_fields_str = table_fields_ident.join(",");
     
-    let table_fields_update_str = table_fields_ident.join("=?,");
+    let mut table_fields_update_str = table_fields_ident.join("=?,");
+    table_fields_update_str = table_fields_update_str + "=?";
+    
     let table_fields_update_str = table_fields_update_str.trim_end_matches(",");
 
     let code = quote::quote! {
