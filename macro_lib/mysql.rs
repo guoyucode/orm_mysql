@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use common_uu::{string::StringExentd};
 use proc_macro::TokenStream;
 use quote::ToTokens;
@@ -117,10 +119,8 @@ pub fn db_query(input: TokenStream) -> TokenStream {
     let query_quest = query_quest.join(",");
     let table_fields_str = table_fields_ident.join(",");
     
-    let mut table_fields_update_str = table_fields_ident.join("=?,");
-    table_fields_update_str = table_fields_update_str + "=?";
-    
-    let table_fields_update_str = table_fields_update_str.trim_end_matches(",");
+    let table_fields_update_str = table_fields_ident.iter().map(|x| format!("{x}=?,")).collect::<Vec<_>>().join("").trim_end_matches(",").to_string();
+
 
     let code = quote::quote! {
     use orm_mysql::mysql_async::prelude::*;
@@ -215,9 +215,11 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             Self: Sized,
             C: Queryable + Send + Sync
         {
-            let sql = format!("update {table_name_var} set ({table_fields})",
+            let sql = format!("update {table_name_var} set {table_fields} where {where_var}={val}",
                 table_name_var = #table_name,
-                table_fields = #table_fields_update_str, 
+                table_fields = #table_fields_update_str,
+                where_var = #id_field_str,
+                val = serde_json::json!(self.#id_field_ident).to_string()
             );
             orm_mysql::log::debug!("update sql: {}", sql);
             let r: Option<(i64, )> = conn.exec_first(sql, self).await?;
