@@ -67,7 +67,7 @@ pub fn db_query(input: TokenStream) -> TokenStream {
     let mut table_fields_ident = vec![];
     let mut fields_ident_init = vec![];
     
-    let mut id_field_str = String::new();
+    let mut id_field_str = String::from("id");
     let mut id_field_ident = syn::Ident::new_raw("id", proc_macro2::Span::call_site());
 
     for ele in fields.named {
