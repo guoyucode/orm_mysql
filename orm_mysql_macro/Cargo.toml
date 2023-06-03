@@ -1,5 +1,5 @@
 [package]
-name = "macro_lib"
+name = "orm_mysql_macro"
 version = "0.2.0"
 edition = "2021"
 
@@ -8,9 +8,9 @@ proc-macro = true
 path = "./lib.rs"
 
 [dependencies]
-log = "*"
+log = "0.4"
 syn = "1"
 quote = "1"
 proc-macro2 = "1"
 serde_json = { version = "1.0", features = ["preserve_order"] }
-common_uu = {git = "https://gitee.com/guoyucode/common_uu.git", default-features = false}
+common_uu = {version = "1", default-features = false}

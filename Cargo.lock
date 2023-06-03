@@ -333,6 +333,24 @@ dependencies = [
 [[package]]
 name = "common_uu"
 version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "15ee969673466273439b3c6daefccbd3299f47d4971b04068729fbb6e487f50f"
+dependencies = [
+ "chrono",
+ "dirs",
+ "enum-utils",
+ "log",
+ "log4rs",
+ "once_cell",
+ "rand",
+ "serde",
+ "serde_json",
+ "uuid",
+]
+
+[[package]]
+name = "common_uu"
+version = "1.0.0"
 source = "git+https://gitee.com/guoyucode/common_uu.git#ae15752ad1cf4227040cd7a7b4c62f990163c4f5"
 dependencies = [
  "chrono",
@@ -1140,7 +1158,7 @@ dependencies = [
 name = "macro_lib"
 version = "0.2.0"
 dependencies = [
- "common_uu",
+ "common_uu 1.0.0 (git+https://gitee.com/guoyucode/common_uu.git)",
  "log",
  "proc-macro2",
  "quote",
@@ -1210,8 +1228,9 @@ dependencies = [
 
 [[package]]
 name = "mysql_async"
-version = "0.32.1"
-source = "git+https://github.com/guoyucode/mysql_async.git?branch=master#8f4af346bdf4b4b32f0dfcb02ab1c342b0297187"
+version = "0.32.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5272f59b5b1f93d65f7f826c1f025d6e410e89fb50a67e05aa20b35a55a8c0a"
 dependencies = [
  "bytes",
  "crossbeam",
@@ -1254,7 +1273,6 @@ dependencies = [
  "byteorder",
  "bytes",
  "cc",
- "chrono",
  "cmake",
  "crc32fast",
  "flate2",
@@ -1408,11 +1426,11 @@ dependencies = [
 
 [[package]]
 name = "orm_mysql"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "async-trait",
  "chrono",
- "common_uu",
+ "common_uu 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log",
  "macro_lib",
  "mysql_async",
