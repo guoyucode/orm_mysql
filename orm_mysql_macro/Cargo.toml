@@ -2,6 +2,8 @@
 name = "orm_mysql_macro"
 version = "0.2.0"
 edition = "2021"
+authors = ["guoyu <guoyumail@qq.com>"]
+license = "MIT OR Apache-2.0"
 
 [lib]
 proc-macro = true
