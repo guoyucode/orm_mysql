@@ -1,3 +1,4 @@
+
 use orm_mysql::mysql_async::prelude::*;
 use orm_mysql::mysql::OrmMySqlTrait;
 use orm_mysql::OrmMySql;
@@ -82,15 +83,10 @@ struct UserData {
     username15: String,
     float_v: f64,
 
-    // not support
+    // not support; 暂时不支持
     // datetime_utc_v: Option<chrono::DateTime<chrono::Utc>>,
     // datetime_local_v: chrono::DateTime<chrono::Local>,
-    naive_date_v: chrono::NaiveDate,
-    naive_date_opt_v: Option<chrono::NaiveDate>,
+    // naive_date_v: time::PrimitiveDateTime,
+    // naive_date_opt_v: Option<time::Date>,
 
-    naive_time_v: chrono::NaiveTime,
-    naive_time_opt_v: Option<chrono::NaiveTime>,
-
-    naive_date_time_v: chrono::NaiveDateTime,
-    naive_date_time_opt_v: Option<chrono::NaiveDateTime>,
 }
