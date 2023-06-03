@@ -4,6 +4,7 @@ version = "0.2.0"
 edition = "2021"
 authors = ["guoyu <guoyumail@qq.com>"]
 license = "MIT OR Apache-2.0"
+description = "A macro for mysql orm"
 
 [lib]
 proc-macro = true
