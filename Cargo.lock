@@ -1207,8 +1207,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "mysql_async"
-version = "0.32.2"
+name = "mysql_async_uu"
+version = "0.32.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3db626907e54b3e8ee9b21a7825bdc9fe0dc992a22d21780cd02e41ec8937b3b"
 dependencies = [
  "bytes",
  "crossbeam",
@@ -1411,7 +1413,7 @@ dependencies = [
  "chrono",
  "common_uu",
  "log",
- "mysql_async",
+ "mysql_async_uu",
  "orm_mysql_macro",
  "serde",
  "serde_json",
