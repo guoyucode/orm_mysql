@@ -156,6 +156,10 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             C: Queryable + Send + Sync,
         {
 
+            let where_sql = where_sql.trim_start_matches("where");
+            let where_sql = where_sql.trim_start_matches("WHERE");
+            let where_sql = format!("where {}", where_sql);
+
             let table_name_var = #table_name;
             let mut sql = format!("select {select_sql} from {table_name_var} {where_sql}",
                 select_sql = #table_fields_str,
@@ -183,6 +187,11 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             Self: Sized,
             C: Queryable + Send + Sync,
         {
+
+            let where_sql = where_sql.trim_start_matches("where");
+            let where_sql = where_sql.trim_start_matches("WHERE");
+            let where_sql = format!("where {}", where_sql);
+
             let table_name_var = #table_name;
             let mut sql = format!("select {select_sql} from {table_name_var} {where_sql} limit 1",
                 select_sql = #table_fields_str,

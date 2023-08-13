@@ -1407,7 +1407,7 @@ dependencies = [
 
 [[package]]
 name = "orm_mysql"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "async-trait",
  "chrono",
