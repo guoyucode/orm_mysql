@@ -1,1 +1,3 @@
 target
+/mysql_async/.git/*
+/mysql_async/.git_bak/*
