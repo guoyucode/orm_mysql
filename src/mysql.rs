@@ -258,6 +258,36 @@ pub mod con_value {
         }
     }
 
+    impl ValueConv<u64> for mysql_async::Value {
+        fn conv(&self) -> common_uu::IResult<u64> {
+            let v = match self.clone() {
+                mysql_async::Value::NULL => 0,
+                mysql_async::Value::Bytes(v) => String::from_utf8(v)?.parse()?,
+                mysql_async::Value::Int(v) => v as u64,
+                mysql_async::Value::UInt(v) => v as u64,
+                mysql_async::Value::Float(v) => v as u64,
+                mysql_async::Value::Double(v) => v as u64,
+                other => Err(format!("ValueConv Error: {:?}", other))?,
+            };
+            Ok(v)
+        }
+    }
+
+    impl ValueConv<u32> for mysql_async::Value {
+        fn conv(&self) -> common_uu::IResult<u32> {
+            let v = match self.clone() {
+                mysql_async::Value::NULL => 0,
+                mysql_async::Value::Bytes(v) => String::from_utf8(v)?.parse()?,
+                mysql_async::Value::Int(v) => v as u32,
+                mysql_async::Value::UInt(v) => v as u32,
+                mysql_async::Value::Float(v) => v as u32,
+                mysql_async::Value::Double(v) => v as u32,
+                other => Err(format!("ValueConv Error: {:?}", other))?,
+            };
+            Ok(v)
+        }
+    }
+
     impl ValueConv<usize> for mysql_async::Value {
         fn conv(&self) -> common_uu::IResult<usize> {
             let v = match self.clone() {
