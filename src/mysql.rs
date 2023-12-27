@@ -1,3 +1,6 @@
+use common_uu::JsonV;
+use mysql_async::{prelude::Queryable, Params};
+
 #[async_trait::async_trait]
 pub trait OrmMySqlTrait {
     async fn query<C>(
@@ -19,6 +22,10 @@ pub trait OrmMySqlTrait {
         Self: Sized,
         C: mysql_async::prelude::Queryable + Send + Sync;
 
+    fn insert_sql(&self) -> String
+    where
+        Self: Sized;
+
     async fn update<C>(self, comm: &mut C) -> common_uu::IResult<i64>
     where
         Self: Sized,
@@ -28,6 +35,104 @@ pub trait OrmMySqlTrait {
     where
         Self: Sized,
         C: mysql_async::prelude::Queryable + Send + Sync;
+
+    fn delete_sql(&self) -> String
+    where
+        Self: Sized;
+
+    fn where_id(&self) -> common_uu::JsonV
+    where
+        Self: Sized;
+}
+
+#[async_trait::async_trait]
+pub trait OrmMySqlTraitConn<T: OrmMySqlTrait, C: mysql_async::prelude::Queryable + Send + Sync> {
+    async fn query(&mut self, where_sql: &str, limit: Option<usize>) -> common_uu::IResult<Vec<T>>;
+    async fn query_first(&mut self, where_sql: &str) -> common_uu::IResult<Option<T>>;
+    async fn insert(&mut self, v: &T) -> common_uu::IResult<i64>;
+    async fn insert_arr(&mut self, arr: &Vec<T>) -> common_uu::IResult<i64>;
+    async fn update(&mut self, v: &T) -> common_uu::IResult<i64>;
+    async fn delete(&mut self, v: &T) -> common_uu::IResult<i64>;
+    async fn delete_arr(&mut self, arr: &Vec<T>) -> common_uu::IResult<i64>;
+}
+
+#[async_trait::async_trait]
+impl<T: OrmMySqlTrait + Send + Sync + Clone + Into<Params>> OrmMySqlTraitConn<T, Self>
+    for mysql_async::Conn
+{
+    async fn query(&mut self, where_sql: &str, limit: Option<usize>) -> common_uu::IResult<Vec<T>> {
+        T::query(self, where_sql, limit).await
+    }
+    async fn query_first(&mut self, where_sql: &str) -> common_uu::IResult<Option<T>> {
+        T::query_first(self, where_sql).await
+    }
+    async fn insert(&mut self, v: &T) -> common_uu::IResult<i64> {
+        v.clone().insert(self).await
+    }
+    async fn insert_arr(&mut self, arr: &Vec<T>) -> common_uu::IResult<i64> {
+        if arr.is_empty() {
+            return Ok(0);
+        }
+        let sql = arr[0].insert_sql();
+        self.exec_batch(sql, arr.clone()).await?;
+        Ok(arr.len() as i64)
+    }
+    async fn update(&mut self, v: &T) -> common_uu::IResult<i64> {
+        v.clone().update(self).await
+    }
+    async fn delete(&mut self, v: &T) -> common_uu::IResult<i64> {
+        v.delete(self).await
+    }
+    async fn delete_arr(&mut self, arr: &Vec<T>) -> common_uu::IResult<i64> {
+        if arr.is_empty() {
+            return Ok(0);
+        }
+        let sql = arr[0].delete_sql();
+        let params = arr.iter().map(|x| x.where_id().to_string()).collect::<Vec<_>>();
+        // self.exec_batch(sql, params).await?;
+        unimplemented!("delete_arr");
+        Ok(arr.len() as i64)
+    }
+}
+
+#[async_trait::async_trait]
+impl<T: OrmMySqlTrait + Send + Sync + Clone + Into<Params>, 'a> OrmMySqlTraitConn<T, Self>
+    for mysql_async::Transaction<'a>
+{
+    async fn query(&mut self, where_sql: &str, limit: Option<usize>) -> common_uu::IResult<Vec<T>> {
+        T::query(self, where_sql, limit).await
+    }
+    async fn query_first(&mut self, where_sql: &str) -> common_uu::IResult<Option<T>> {
+        T::query_first(self, where_sql).await
+    }
+    async fn insert(&mut self, v: &T) -> common_uu::IResult<i64> {
+        v.clone().insert(self).await
+    }
+    async fn insert_arr(&mut self, arr: &Vec<T>) -> common_uu::IResult<i64> {
+        if arr.is_empty() {
+            return Ok(0);
+        }
+        let sql = arr[0].insert_sql();
+        println!("insert_arr({}): {sql}", arr.len());
+        self.exec_batch(sql, arr.clone()).await?;
+        Ok(arr.len() as i64)
+    }
+    async fn update(&mut self, v: &T) -> common_uu::IResult<i64> {
+        v.clone().update(self).await
+    }
+    async fn delete(&mut self, v: &T) -> common_uu::IResult<i64> {
+        v.delete(self).await
+    }
+    async fn delete_arr(&mut self, arr: &Vec<T>) -> common_uu::IResult<i64> {
+        if arr.is_empty() {
+            return Ok(0);
+        }
+        let sql = arr[0].delete_sql();
+        let params = arr.iter().map(|x| x.where_id()).collect::<Vec<_>>();
+        // self.exec_batch(sql, params).await?;
+        unimplemented!("delete_arr");
+        Ok(arr.len() as i64)
+    }
 }
 
 pub mod con_value {
@@ -84,9 +189,7 @@ pub mod con_value {
                 }
                 mysql_async::Value::Date(year, month, day, hour, minutes, seconds, micro) => {
                     chrono::NaiveDateTime::parse_from_str(
-                        &format!(
-                            "{year}-{month}-{day} {hour}:{minutes}:{seconds}.{micro:0>6}"
-                        ),
+                        &format!("{year}-{month}-{day} {hour}:{minutes}:{seconds}.{micro:0>6}"),
                         "%Y-%m-%d %H:%M:%S.f6",
                     )
                 }
@@ -118,12 +221,7 @@ pub mod con_value {
                     chrono::NaiveDate::parse_from_str(&s, "%Y-%m-%d")
                 }
                 mysql_async::Value::Date(year, month, day, hour, minutes, seconds, micro) => {
-                    chrono::NaiveDate::parse_from_str(
-                        &format!(
-                            "{year}-{month}-{day}"
-                        ),
-                        "%Y-%m-%d",
-                    )
+                    chrono::NaiveDate::parse_from_str(&format!("{year}-{month}-{day}"), "%Y-%m-%d")
                 }
                 mysql_async::Value::Time(_is_negative, days, hours, minutes, seconds, micro) => {
                     let mut v = chrono::NaiveDate::from_ymd(1970, 1, 1);

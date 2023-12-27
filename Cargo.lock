@@ -1407,7 +1407,7 @@ dependencies = [
 
 [[package]]
 name = "orm_mysql"
-version = "1.1.1"
+version = "1.1.2"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1423,9 +1423,9 @@ dependencies = [
 
 [[package]]
 name = "orm_mysql_macro"
-version = "0.2.0"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b73108a16325702d6ce281e3246242c0872d7c364f6d9bf488e4fab9f9e59a9"
+checksum = "48b9624827a04cf0cee2d0a00512873ea5e105ba809e7582693b8a20eac43323"
 dependencies = [
  "common_uu",
  "log",

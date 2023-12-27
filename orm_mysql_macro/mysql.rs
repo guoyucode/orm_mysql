@@ -203,17 +203,22 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             Ok(r)
         }
 
+        fn insert_sql(&self) -> String {
+            let sql = format!("insert into {table_name_var} ({table_fields})values({query_quest})",
+                table_name_var = #table_name,
+                table_fields = #table_fields_str,
+                query_quest = #query_quest,
+            );
+            orm_mysql::log::debug!("insert sql: {sql}");
+            sql
+        }
+
         async fn insert<C>(self, conn: &mut C) -> common_uu::IResult<i64>
         where
             Self: Sized,
             C: Queryable + Send + Sync
         {
-            let sql = format!("insert into {table_name_var} ({table_fields})values({query_quest})",
-                table_name_var = #table_name,
-                table_fields = #table_fields_str, 
-                query_quest = #query_quest,
-            );
-            orm_mysql::log::debug!("insert sql: {}", sql);
+            let sql = self.insert_sql();
             let r: Option<(i64, )> = conn.exec_first(sql, self).await?;
             let r = r.map(|v|v.0).unwrap_or_default();
             Ok(r)
@@ -251,6 +256,23 @@ pub fn db_query(input: TokenStream) -> TokenStream {
             let r = r.map(|v|v.0).unwrap_or_default();
             Ok(r)
         }
+
+
+        fn delete_sql(&self) -> String
+        where
+            Self: Sized
+        {
+            let sql = format!("delete from {table_name_var} where {where_var}=?",
+                table_name_var = #table_name,
+                where_var = #id_field_str,
+            );
+            sql
+        }
+
+        fn where_id(&self) -> serde_json::Value{
+            serde_json::json!(self.#id_field_ident)
+        }
+
     }
 
     };
